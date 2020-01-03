@@ -1,0 +1,8 @@
+# python
+*.py[cod]
+
+venv3
+
+.idea
+
+*.log
