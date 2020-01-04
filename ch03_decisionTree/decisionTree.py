@@ -4,6 +4,7 @@
 # @Author : LYX-夜光
 
 from math import log
+import json
 
 # 计算香农熵
 def calcShannonEnt(dataSet):
@@ -84,6 +85,18 @@ def classify(inputTree, featLabels, testVec):
             else:  # 子树为叶子节点
                 classLabel = secondDict[key]
             return classLabel
+
+# 存储决策树
+def storeTree(inputTree, fileName):
+    file = open(fileName, "w")
+    file.write(json.dumps(inputTree))
+    file.close()
+
+# 读取决策树
+def grabTree(fileName):
+    file = open(fileName)
+    fileStr = file.read()
+    return json.loads(fileStr)
 
 if __name__ == "__main__":
     dataSet = [[1, 1, 'yes'],
