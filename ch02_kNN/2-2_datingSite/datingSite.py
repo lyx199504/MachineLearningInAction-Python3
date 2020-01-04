@@ -4,22 +4,7 @@
 # @Author : LYX-夜光
 
 import numpy as np
-
-# k近邻算法
-def classify0(inX, dataSet, labels, k):
-    # inX输入向量 dataSet数据集 labels数据集对应的标签
-    dataSetSize = dataSet.shape[0]
-    diffMat = np.tile(inX, (dataSetSize, 1)) - dataSet
-    sqDiffMat = diffMat**2
-    sqDistances = sqDiffMat.sum(axis=1)  # 每行相加
-    distances = sqDistances**0.5  # 数据集dataSet和输入向量inX的欧式距离
-    sortedDistIndicies = distances.argsort()  # 将距离从小到大排序，排序后数据对应的下标
-    classCount = {}
-    for i in range(k):
-        voteIlabel = labels[sortedDistIndicies[i]]  # 距离最小的k个标签
-        classCount[voteIlabel] = classCount.get(voteIlabel, 0) + 1  # 计算标签的数量
-    sortedClassCount = sorted(classCount.items(), key=lambda x: x[1], reverse=True)
-    return sortedClassCount[0][0]
+from ch02_kNN import kNN
 
 # 初始化数据
 def file2matrix(fileName):
@@ -63,7 +48,7 @@ def datingClassTest():
     numTestVecs = int(m*hoRatio)
     errorCount = 0.0
     for i in range(numTestVecs):  # 前numTestVecs个数据为测试集，其他数据为训练集
-        classifierResult = classify0(normMat[i, :], normMat[numTestVecs:m, :], datingLabels[numTestVecs:m], 3)
+        classifierResult = kNN.classify0(normMat[i, :], normMat[numTestVecs:m, :], datingLabels[numTestVecs:m], 3)
         print("the classifier came back with: %s, the real answer is: %s" % (classifierResult, datingLabels[i]))
         if classifierResult != datingLabels[i]:
             errorCount += 1.0
@@ -78,7 +63,7 @@ def classifyPerson():
     datingDataMat, datingLabels = file2matrix("datingTestSet2.txt")
     normMat, ranges, minVals = autoNorm(datingDataMat)
     inArr = np.array([ffMiles, percentTats, iceCream])
-    classifierResult = classify0((inArr - minVals)/ranges, normMat, datingLabels, 3)
+    classifierResult = kNN.classify0((inArr - minVals)/ranges, normMat, datingLabels, 3)
     print("you will probably like this person: %s" % resultList[classifierResult-1])
 
 if __name__ == "__main__":
