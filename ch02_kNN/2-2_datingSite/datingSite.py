@@ -34,13 +34,11 @@ def autoNorm(dataSet):
 
 # 测试分类的正确率
 def datingClassTest():
-    """
-        datingTestSet2.txt中数据：
+    """ datingTestSet2.txt中数据：
         第一列：每年获得的飞行常客里程数
         第二列：玩视频游戏所耗时间百分比
         第三列：每周消费的冰淇淋公升数
-        第四列：三种类型的人：1不喜欢的人 2魅力一般的人 3极具魅力的人
-        """
+        第四列：三种类型的人：1不喜欢的人 2魅力一般的人 3极具魅力的人 """
     hoRatio = 0.1
     datingDataMat, datingLabels = file2matrix("datingTestSet2.txt")
     normMat, ranges, minVals = autoNorm(datingDataMat)
