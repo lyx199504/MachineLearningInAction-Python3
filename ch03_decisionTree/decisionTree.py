@@ -93,7 +93,7 @@ def storeTree(inputTree, fileName):
     file.close()
 
 # 读取决策树
-def grabTree(fileName):
+def readTree(fileName):
     file = open(fileName)
     fileStr = file.read()
     return json.loads(fileStr)
