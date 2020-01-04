@@ -36,12 +36,13 @@ def chooseBestFeatureToSplit(dataSet):
     bestInfoGain = 0.0
     bestFeature = -1
     for i in range(numFeatures):
-        uniqueVals = set([example[i] for example in dataSet])
+        uniqueVals = set([example[i] for example in dataSet])  # 取第i个特征的值
         newEntropy = 0.0
         for value in uniqueVals:
+            # 将第i个特征包含value的数据取出，并去掉第i列，将取出的数据作为子数据集
             subDataSet = splitDataSet(dataSet, i, value)
-            prob = len(subDataSet)/float(len(dataSet))
-            newEntropy += prob * calcShannonEnt(subDataSet)
+            prob = len(subDataSet)/float(len(dataSet))  # 子数据集的概率
+            newEntropy += prob * calcShannonEnt(subDataSet)  # 子数据集的算术平均作为新的香农熵
         infoGain = baseEntropy - newEntropy  # 信息增益
         if bestInfoGain < infoGain:  # 取信息增益最大
             bestInfoGain = infoGain
