@@ -20,3 +20,9 @@ def classify0(inX, dataSet, labels, k):
         classCount[voteIlabel] = classCount.get(voteIlabel, 0) + 1  # 计算标签的数量
     sortedClassCount = sorted(classCount.items(), key=lambda x: x[1], reverse=True)
     return sortedClassCount[0][0]
+
+if __name__ == "__main__":
+    # 测试
+    group = np.array([[1.0, 1.1], [1.0, 1.0], [0, 0], [0, 0.1]])
+    labels = ['A', 'A', 'B', 'B']
+    print(classify0([0.6, 0.5], group, labels, 3))
