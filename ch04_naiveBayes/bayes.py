@@ -25,8 +25,8 @@ def trainNaiveBayes(trainMatrix, trainCategory):
     numTrainDocs = len(trainMatrix)  # 文档数
     numWords = len(trainMatrix[0])  # 特征单词的个数
     pAbusive = sum(trainCategory)/float(numTrainDocs)  # 侮辱性文档在总文档中占比
-    p1Num = np.ones(numWords); p0Num = np.ones(numWords)  # 结果需要取对数，防止分量为0，因此初始化为1
-    p1Denom = 2.0; p0Denom = 2.0  # 防止取对数后值为0，因此需要pxDenom > pxNum，故初始化为2
+    p1Num, p0Num = np.ones(numWords), np.ones(numWords)  # 结果需要取对数，防止分量为0，因此初始化为1
+    p1Denom, p0Denom = 2.0, 2.0  # 防止取对数后值为0，因此需要pxDenom > pxNum，故初始化为2
     for i in range(numTrainDocs):
         if trainCategory[i] == 1:  # 侮辱性文档
             p1Num += trainMatrix[i]  # 侮辱性文档中存在某单词的文档数
