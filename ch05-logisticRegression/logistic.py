@@ -4,6 +4,7 @@
 # @Author : LYX-夜光
 
 import numpy as np
+import random
 
 # sigmoid函数
 def sigmoid(inX):
@@ -18,8 +19,22 @@ def gradDescent(dataMatIn, classLabels):
     maxCycles = 500
     weights = np.ones((n, 1))
     for k in range(maxCycles):
-        z = sigmoid(dataMatrix * weights)
-        weights -= alpha * dataMatrix.transpose() * (z - labelMat)  # 梯度下降法
+        h = sigmoid(dataMatrix * weights)
+        weights -= alpha * dataMatrix.transpose() * (h - labelMat)  # 梯度下降法
+    return weights
+
+# alpha动态减少机制下的随机梯度下降
+def stocGradDescent(dataMatrix, classLabels, numIter=150):
+    m, n = np.shape(dataMatrix)
+    weights = np.ones(n)
+    for j in range(numIter):
+        dataIndex = list(range(m))
+        for i in range(m):
+            alpha = 4/(1.0+j+i)+0.01
+            randIndex = int(random.uniform(0, len(dataIndex)))
+            h = sigmoid(sum(dataMatrix[randIndex] * weights))
+            weights -= alpha * (h - classLabels[randIndex]) * dataMatrix[randIndex]
+            del dataIndex[randIndex]
     return weights
 
 # 画出拟合曲线
@@ -54,5 +69,5 @@ if __name__ == "__main__":
         lineArr = line.strip().split()
         dataMat.append([1.0, float(lineArr[0]), float(lineArr[1])])
         labelMat.append(int(lineArr[2]))
-    weights = gradDescent(dataMat, labelMat)
+    weights = stocGradDescent(np.array(dataMat), labelMat, 500)
     plotBestFit(dataMat, labelMat, weights)
