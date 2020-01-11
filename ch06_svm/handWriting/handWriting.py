@@ -5,6 +5,7 @@
 
 import numpy as np
 from ch02_kNN.handWriting.handWriting import img2vector
+from ch06_svm.svm import optStruct
 
 # 初始化图像
 def loadImages(dirName):
@@ -26,8 +27,30 @@ def loadImages(dirName):
     return trainingMat, hwLabels
 
 def testDigits(kTup=('rbf', 10)):
-    dataArr, labelArr = loadImages('trainingDigits')
-    # b, alphas =
+    dataArr, labelArr = loadImages('../../ch02_kNN/handWriting/trainingDigits')
+    opt = optStruct(dataArr, labelArr, 200, 0.0001, kTup)
+    opt.smoP(10000)  # 数据训练
+    index = np.nonzero(opt.alphas.A > 0)[0]  # 获取大于0的下标
+    X, y = opt.X[index], opt.y[index]
+    print("there are %d Support Vectors" % np.shape(X)[0])
+    errorCount = 0
+    for i in range(opt.m):
+        kernelEval = opt.kernelTrans(X, opt.X[i, :], kTup)
+        predict = kernelEval.T * np.multiply(y, opt.alphas[index]) + opt.b
+        if np.sign(predict) != np.sign(labelArr[i]):
+            errorCount += 1
+    print("the training error rate is: %f" % (float(errorCount)/opt.m))
+
+    errorCount = 0
+    dataArr, labelArr = loadImages('../../ch02_kNN/handWriting/testDigits')
+    m = np.shape(dataArr)[0]
+    for i in range(m):
+        kernelEval = opt.kernelTrans(X, np.mat(dataArr)[i, :], kTup)
+        predict = kernelEval.T * np.multiply(y, opt.alphas[index]) + opt.b
+        if np.sign(predict) != np.sign(labelArr[i]):
+            errorCount += 1
+    print("the test error rate is: %f" % (float(errorCount)/m))
 
 if __name__ == "__main__":
-    print(loadImages("../../ch02_kNN/handWriting/trainingDigits"))
+    # 运行需要较长时间
+    testDigits(('rbf', 10))
