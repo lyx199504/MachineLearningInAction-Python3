@@ -38,7 +38,7 @@ def buildStump(dataArr, classLabels, D):
                     bestStump['ineq'] = inequal
     return bestStump, minError, bestClass
 
-# adaBoost算法
+# adaBoost算法，训练分类
 def adaBoostTrainDS(dataArr, classLabels, numIter=40):
     weakClassArr = []
     m = np.shape(dataArr)[0]
@@ -68,6 +68,16 @@ def adaBoostTrainDS(dataArr, classLabels, numIter=40):
             break
     return weakClassArr
 
+# 预测分类
+def adaClassify(dataArr, classifierArr):
+    dataMat = np.mat(dataArr)
+    m = np.shape(dataMat)[0]
+    aggClass = np.mat(np.zeros((m, 1)))
+    for i in range(len(classifierArr)):
+        bestClass = stumpClassify(dataMat, classifierArr[i]['dim'], classifierArr[i]['thresh'], classifierArr[i]['ineq'])
+        aggClass += classifierArr[i]['alpha'] * bestClass
+    return np.sign(aggClass)
+
 if __name__ == "__main__":
     dataMat = np.mat([[1.0, 2.1],
                       [2.0, 1.1],
@@ -75,4 +85,8 @@ if __name__ == "__main__":
                       [1.0, 1.0],
                       [2.0, 1.0]])
     classLabels = [1.0, 1.0, -1.0, -1.0, 1.0]
-    adaBoostTrainDS(dataMat, classLabels, 9)
+    classifierArr = adaBoostTrainDS(dataMat, classLabels, 9)
+    testData = [[0, 0], [2, 2]]
+    results = adaClassify(testData, classifierArr)
+    for i in range(len(testData)):
+        print(testData[i], "classified as: ", int(results[i]))
