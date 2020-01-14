@@ -52,6 +52,10 @@ def lwlrTest(testArr, xArr, yArr, k=1.0):
         yHat[i] = testArr[i] * lwlr(testArr[i], xArr, yArr, k)
     return yHat
 
+# 最小二乘
+def rssError(yMat, yHat):
+    return ((yMat-yHat)**2).sum()
+
 # 画出拟合曲线
 def plotBestFit(dataMat, labelMat, yHat):
     import matplotlib.pyplot as plt
