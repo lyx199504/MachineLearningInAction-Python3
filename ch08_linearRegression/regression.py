@@ -19,7 +19,7 @@ def loadDataSet(fileName):
         labelMat.append(float(curLine[-1]))
     return dataMat, labelMat
 
-# 公式法求回归参数
+# 最小二乘公式法求回归参数
 def standRegress(xArr, yArr):
     xMat, yMat = np.mat(xArr), np.mat(yArr).T
     xTx = xMat.T * xMat
@@ -44,7 +44,7 @@ def lwlr(testPoint, xArr, yArr, k=1.0):
     weights = xTx.I * (xMat.T * (W * yMat))
     return weights
 
-# 计算预测值
+# 测试局部加权线性回归
 def lwlrTest(testArr, xArr, yArr, k=1.0):
     m = np.shape(testArr)[0]
     yHat = np.zeros(m)
@@ -52,7 +52,63 @@ def lwlrTest(testArr, xArr, yArr, k=1.0):
         yHat[i] = testArr[i] * lwlr(testArr[i], xArr, yArr, k)
     return yHat
 
-# 最小二乘
+# 标准化
+def regularize(xMat):
+    inMat = xMat.copy()
+    inMeans = np.mean(inMat, 0)
+    inVar = np.var(inMat, 0)
+    inMat = (inMat - inMeans)/inVar
+    return inMat
+
+# 岭回归
+def ridgeRegres(xMat, yMat, lam=0.2):
+    xTx = xMat.T * xMat
+    denom = xTx + np.eye(np.shape(xMat)[1]) * lam
+    if np.linalg.det(denom) == 0.0:
+        print("This matrix is singular(奇异), cannot do inverse(转置).")
+        return
+    weights = denom.I * (xMat.T * yMat)
+    return weights
+
+# 数据标准化后测试岭回归
+def ridgeTest(xArr, yArr):
+    xMat, yMat = np.mat(xArr), np.mat(yArr).T
+    yMean = np.mean(yMat, 0)
+    yMat = yMat - yMean
+    xMat = regularize(xMat)
+    numTestPts = 30
+    wMat = np.zeros((numTestPts, np.shape(xMat)[1]))
+    for i in range(numTestPts):
+        weights = ridgeRegres(xMat, yMat, np.exp(i-10))
+        wMat[i, :] = weights.T
+    return wMat
+
+# 前向逐步线性回归
+def stageWise(xArr, yArr, eps=0.01, numIter=100):
+    xMat, yMat = np.mat(xArr), np.mat(yArr).T
+    yMean = np.mean(yMat, 0)
+    yMat = yMat - yMean
+    xMat = regularize(xMat)
+    m, n = np.shape(xMat)
+    returnMat = np.zeros((numIter, n))
+    weights = np.zeros((n, 1))
+    wsMax = weights.copy()
+    for i in range(numIter):
+        lowestError = np.inf
+        for j in range(n):
+            for sign in [-1, 1]:
+                wsTest = weights.copy()
+                wsTest[j] += eps * sign
+                yTest = xMat * wsTest
+                rssE = rssError(yMat.A, yTest.A)
+                if lowestError > rssE:
+                    lowestError = rssE
+                    wsMax = wsTest
+        weights = wsMax.copy()
+        returnMat[i, :] = weights.T
+    return returnMat
+
+# 计算误差
 def rssError(yMat, yHat):
     return ((yMat-yHat)**2).sum()
 
