@@ -8,10 +8,10 @@ import numpy as np
 
 # 初始化数据
 def loadDataSet(fileName):
+    lineList = open(fileName).readlines()
+    numFeat = len(lineList[0].split('\t'))
     dataMat, labelMat = [], []
-    readFile = open(fileName)
-    numFeat = len(readFile.readline().split('\t'))
-    for line in readFile.readlines():
+    for line in lineList:
         lineArr = []
         curLine = line.strip().split('\t')
         for i in range(numFeat - 1):
@@ -22,7 +22,7 @@ def loadDataSet(fileName):
 
 if __name__ == "__main__":
     dataArr, labelArr = loadDataSet('horseColicTraining2.txt')
-    classifierArray = adaBoost.adaBoostTrainDS(dataArr, labelArr, 50)
+    classifierArray = adaBoost.adaBoostTrainDS(dataArr, labelArr, 10)
     testData, testLabel = loadDataSet('horseColicTest2.txt')
     prediction10 = adaBoost.adaClassify(testData, classifierArray)
     m = np.shape(testData)[0]
