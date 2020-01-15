@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
 def getLegoDatas(retX, retY, setNum, year, numPce, origPrc):
-    readFile = open("dataHtml/lego%s.html" % setNum, 'rb')
+    readFile = open("dataHtml/lego%s.txt" % setNum, 'rb')
     html = etree.HTML(readFile.read())
     tables = html.xpath('//div[@class="lview"]/table')
     for table in tables:
