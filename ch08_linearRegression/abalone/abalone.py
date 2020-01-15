@@ -43,4 +43,4 @@ def abaloneByStage():
     plt.show()
 
 if __name__ == "__main__":
-     abaloneByStage()
+    abaloneByRidge()

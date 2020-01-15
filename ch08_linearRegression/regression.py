@@ -4,6 +4,7 @@
 # @Author : LYX-夜光
 
 import numpy as np
+import random
 
 # 初始化数据
 def loadDataSet(fileName):
@@ -71,17 +72,54 @@ def ridgeRegres(xMat, yMat, lam=0.2):
     return weights
 
 # 数据标准化后测试岭回归
-def ridgeTest(xArr, yArr):
+def ridgeTest(xArr, yArr, numTestPts=30):
     xMat, yMat = np.mat(xArr), np.mat(yArr).T
     yMean = np.mean(yMat, 0)
     yMat = yMat - yMean
     xMat = regularize(xMat)
-    numTestPts = 30
     wMat = np.zeros((numTestPts, np.shape(xMat)[1]))
     for i in range(numTestPts):
         weights = ridgeRegres(xMat, yMat, np.exp(i-10))
         wMat[i, :] = weights.T
     return wMat
+
+# 交叉验证测试岭回归
+def crossValidation(xArr, yArr, numVal=10):
+    m = len(yArr)
+    indexList = list(range(m))
+    numTestPts = 30
+    wMat = np.zeros((numTestPts, np.shape(xArr)[1]))
+    errorMat = np.zeros((numVal, numTestPts))
+    for i in range(numVal):
+        trainX, trainY = [], []
+        testX, testY = [], []
+        random.shuffle(indexList)  # 随机打乱数据下标
+        for j in range(m):
+            if j < m*0.9:
+                trainX.append(xArr[indexList[j]])
+                trainY.append(yArr[indexList[j]])
+            else:
+                testX.append(xArr[indexList[j]])
+                testY.append(yArr[indexList[j]])
+        wMat = ridgeTest(trainX, trainY, numTestPts)
+        for k in range(numTestPts):
+            matTestX = np.mat(testX)
+            matTrainX = np.mat(trainX)
+            meanTrain = np.mean(matTrainX, 0)  # 每列取均值，即每个特征的均值
+            varTrain = np.var(matTrainX, 0)  # 每列取方差
+            matTestX = (matTestX - meanTrain)/varTrain  # 标准化
+            y = matTestX * np.mat(wMat[k, :]).T + np.mean(trainY)  # 回归方程
+            errorMat[i, k] = rssError(y, testY)
+    meanErrors = np.mean(errorMat, 0)  # 每一列（即每一代）的误差均值
+    minMean = float(min(meanErrors))
+    bestWeights = wMat[np.nonzero(meanErrors == minMean)]
+    xMat, yMat = np.mat(xArr), np.mat(yArr).T
+    meanX = np.mean(xMat, 0)
+    varX = np.var(xMat, 0)
+    weights = bestWeights / varX
+    b = -np.sum(np.multiply(meanX, weights)) + np.mean(yMat)
+    print("岭回归(y=wx+b)参数为：w=", weights, "b=", b)
+    return weights, b
 
 # 前向逐步线性回归
 def stageWise(xArr, yArr, eps=0.01, numIter=100):
