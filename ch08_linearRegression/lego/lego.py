@@ -9,6 +9,7 @@ from lxml import etree
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 
+# 获取乐高数据
 def getLegoDatas(retX, retY, setNum, year, numPce, origPrc):
     readFile = open("dataHtml/lego%s.txt" % setNum, 'rb')
     html = etree.HTML(readFile.read())
@@ -29,6 +30,7 @@ def getLegoDatas(retX, retY, setNum, year, numPce, origPrc):
             retX.append([year, numPce, newFlag, origPrc])
             retY.append(sellingPrice)
 
+# 收集6个乐高网页的数据
 def setDataCollect(retX, retY):
     getLegoDatas(retX, retY, 8288, 2006, 800, 49.99)
     getLegoDatas(retX, retY, 10030, 2002, 3096, 269.99)
@@ -46,7 +48,6 @@ if __name__ == "__main__":
 
     rcParams['font.family'] = 'simhei'  # 显示中文
     plt.figure()
-    # plt.subplot(111)
     line0, = plt.plot(lgY, label="原价格")
     # 最小二乘法预测
     weights = regression.standRegress(lgX1, lgY)

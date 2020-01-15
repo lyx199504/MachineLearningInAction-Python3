@@ -118,7 +118,7 @@ def crossValidation(xArr, yArr, numVal=10):
     varX = np.var(xMat, 0)
     weights = bestWeights / varX
     b = -np.sum(np.multiply(meanX, weights)) + np.mean(yMat)
-    print("岭回归(y=wx+b)参数为：w=", weights, "b=", b)
+    print("岭回归(y=wx+b)参数为：w =", weights, "b =", b)
     return weights, b
 
 # 前向逐步线性回归
