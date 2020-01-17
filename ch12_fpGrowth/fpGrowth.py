@@ -64,6 +64,7 @@ def updateTree(items, inTree, headerTable, count):
     if len(items) > 1:  # 继续构造子节点的子节点
         updateTree(items[1:], inTree.children[items[0]], headerTable, count)
 
+# 找出所有同名节点
 def updateHeader(nodeToTest, targetNode):
     while nodeToTest.nodeLink is not None:
         nodeToTest = nodeToTest.nodeLink
@@ -86,6 +87,18 @@ def findPrefixPath(treeNode):
         treeNode = treeNode.nodeLink
     return condPats
 
+# 递归查找频繁项集
+def mineTree(headerTable, minSup, prefix, freqItemList):
+    bigL = [v[0] for v in sorted(headerTable.items(), key=lambda x: x[1][0])]
+    for basePat in bigL:
+        newFreqSet = prefix.copy()
+        newFreqSet.add(basePat)  # 关联元素加到集合中
+        freqItemList.append(newFreqSet)
+        condPattBases = findPrefixPath(headerTable[basePat][1])  # 获取所有双亲集合
+        _, myHead = createTree(condPattBases, minSup)  # 再用双亲集合构造树
+        if myHead is not None:  # 用双亲集合构造的树再递归查找，最终freqItemList得到所有关联集合
+            mineTree(myHead, minSup, newFreqSet, freqItemList)
+
 if __name__ == "__main__":
     dataSet = [['r', 'z', 'h', 'j', 'p'],
                ['z', 'y', 'x', 'w', 'v', 'u', 't', 's'],
@@ -96,5 +109,6 @@ if __name__ == "__main__":
     dataDict = createInitSet(dataSet)
     FPtree, headerTable = createTree(dataDict, 3)
     FPtree.disp()
-    condPats = findPrefixPath(headerTable['r'][1])
-    print(condPats)
+    freqItems = []
+    mineTree(headerTable, 3, set([]), freqItems)
+    print(freqItems)
