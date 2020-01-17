@@ -69,6 +69,23 @@ def updateHeader(nodeToTest, targetNode):
         nodeToTest = nodeToTest.nodeLink
     nodeToTest.nodeLink = targetNode
 
+# 递归获取双亲名称
+def ascendTree(leafNode, prefixPath):
+    if leafNode.parent is not None:
+        prefixPath.append(leafNode.name)
+        ascendTree(leafNode.parent, prefixPath)
+
+# 获取所有双亲集合
+def findPrefixPath(treeNode):
+    condPats = {}
+    while treeNode is not None:
+        prefixPath = []
+        ascendTree(treeNode, prefixPath)
+        if len(prefixPath) > 1:
+            condPats[frozenset(prefixPath[1:])] = treeNode.count
+        treeNode = treeNode.nodeLink
+    return condPats
+
 if __name__ == "__main__":
     dataSet = [['r', 'z', 'h', 'j', 'p'],
                ['z', 'y', 'x', 'w', 'v', 'u', 't', 's'],
@@ -79,3 +96,5 @@ if __name__ == "__main__":
     dataDict = createInitSet(dataSet)
     FPtree, headerTable = createTree(dataDict, 3)
     FPtree.disp()
+    condPats = findPrefixPath(headerTable['r'][1])
+    print(condPats)
