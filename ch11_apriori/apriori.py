@@ -30,6 +30,7 @@ def scanD(D, Ck, minSupport):
         supportData[key] = support
     return retList, supportData
 
+# 合并新集合
 def aprioriGen(Lk, k):
     retList = []
     lenLk = len(Lk)
@@ -56,8 +57,39 @@ def apriori(dataSet, minSupport=0.5):
         k += 1
     return L, supportData
 
+# 计算关联
+def calcConf(freqSet, H, supportData, bigRuleList, minConf=0.7):
+    prunedH = []
+    for conseq in H:
+        conf = supportData[freqSet]/supportData[freqSet-conseq]  # 集合支持率除以子集的支持率
+        if conf >= minConf:
+            bigRuleList.append((freqSet-conseq, conseq, conf))  # 关联集合表
+            prunedH.append(conseq)
+    return prunedH
+
+def rulesFromConseq(freqSet, H, supportData, bigRuleList, minConf=0.7):
+    m = len(H[0])
+    if len(freqSet) > m + 1:
+        Hmp1 = aprioriGen(H, m+1)  # 两两组合元素多一个的新集合
+        Hmp1 = calcConf(freqSet, Hmp1, supportData, bigRuleList, minConf)  # 筛选子集
+        if len(Hmp1) > 1:
+            rulesFromConseq(freqSet, Hmp1, supportData, bigRuleList, minConf)
+
+# 生成关联规则
+def generateRules(L, supportData, minConf=0.7):
+    bigRuleList = []
+    for i in range(1, len(L)):
+        for freqSet in L[i]:
+            H1 = [frozenset([item]) for item in freqSet]
+            if i > 1:
+                rulesFromConseq(freqSet, H1, supportData, bigRuleList, minConf)
+            else:
+                calcConf(freqSet, H1, supportData, bigRuleList, minConf)
+    return bigRuleList
+
 if __name__ == "__main__":
     dataSet = [[1, 3, 4], [2, 3, 5], [1, 2, 3, 5], [2, 5]]
     L, supportData = apriori(dataSet)
-    print(L)
-
+    bigRuleList = generateRules(L, supportData, minConf=0.5)
+    for bigRule in bigRuleList:
+        print(bigRule[0], "-->", bigRule[1], "conf:", bigRule[2])
