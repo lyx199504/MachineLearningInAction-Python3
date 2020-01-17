@@ -32,10 +32,10 @@ def createTree(dataDict, minSup=1):
     for trans in dataDict:
         for item in trans:
             headerTable[item] = headerTable.get(item, 0) + dataDict[trans]
-    for item in list(headerTable.keys()):  # 去掉小于支持率的元素
+    for item in list(headerTable.keys()):  # 去掉小于支持量的元素
         if headerTable[item] < minSup:
             del headerTable[item]
-    freqItemSet = set(headerTable.keys())  # 满足支持率的元素集合
+    freqItemSet = set(headerTable.keys())  # 满足支持量的元素集合
     if len(freqItemSet) == 0:
         return None, None
     for item in headerTable:
@@ -45,7 +45,7 @@ def createTree(dataDict, minSup=1):
         localD = {}
         for item in tranSet:
             if item in freqItemSet:
-                localD[item] = headerTable[item][0]  # 每组数据满足支持率的元素
+                localD[item] = headerTable[item][0]  # 每组数据满足支持量的元素
         if len(localD) > 0:
             # 根据每个元素出现的次数大小进行排序，组合成元素列表
             orderedItems = [v[0] for v in sorted(localD.items(), key=lambda x: x[1], reverse=True)]
