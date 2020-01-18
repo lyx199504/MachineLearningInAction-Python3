@@ -12,7 +12,7 @@ def classify0(inX, dataSet, labels, k):
     diffMat = np.tile(inX, (dataSetSize, 1)) - dataSet
     sqDiffMat = diffMat**2
     sqDistances = sqDiffMat.sum(axis=1)  # 每行相加
-    distances = sqDistances**0.5  # 数据集dataSet和输入向量inX的欧式距离
+    distances = sqDistances**0.5  # 数据集dataSet和输入向量inX的欧氏距离
     sortedDistIndicies = distances.argsort()  # 将距离从小到大排序，排序后数据对应的下标
     classCount = {}
     for i in range(k):
