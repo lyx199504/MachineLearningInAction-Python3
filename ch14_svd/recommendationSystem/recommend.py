@@ -55,7 +55,7 @@ def svdEst(dataMat, user, simMeas, item):
     simTotal, ratSimTotal = 0.0, 0.0
     U, Sigma, VT = np.linalg.svd(dataMat)
     Sig4 = np.mat(np.eye(4)*Sigma[:4])
-    xformedItems = dataMat.T * U[:, :4] * Sig4.I
+    xformedItems = dataMat.T * U[:, :4] * Sig4.I  # 结果是V（n行4列）
     for j in range(n):
         userRating = dataMat[user, j]
         if userRating == 0 or j == item:
@@ -75,8 +75,6 @@ if __name__ == "__main__":
                [5, 5, 5, 0, 0]]
     myMat = np.mat(dataMat)
 
-    print(recommend(myMat, 2))
-    print(recommend(myMat, 2, simMeas=ecludSim))
-    print(recommend(myMat, 2, simMeas=pearsSim))
-
-    print(recommend(myMat, 2, estMethod=svdEst))
+    print(recommend(myMat, 2), recommend(myMat, 2, estMethod=svdEst))
+    print(recommend(myMat, 2, simMeas=ecludSim), recommend(myMat, 2, simMeas=ecludSim, estMethod=svdEst))
+    print(recommend(myMat, 2, simMeas=pearsSim), recommend(myMat, 2, simMeas=pearsSim, estMethod=svdEst))
