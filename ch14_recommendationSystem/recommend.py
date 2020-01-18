@@ -49,19 +49,34 @@ def recommend(dataMat, user, N=3, simMeas=cosSim, estMethod=standEst):
         itemsScores.append((item, estimatedScore))
     return sorted(itemsScores, key=lambda x: x[1], reverse=True)[:N]
 
+# 利用SVD对数据降维的基于物品推荐
+def svdEst(dataMat, user, simMeas, item):
+    n = np.shape(dataMat)[1]
+    simTotal, ratSimTotal = 0.0, 0.0
+    U, Sigma, VT = np.linalg.svd(dataMat)
+    Sig4 = np.mat(np.eye(4)*Sigma[:4])
+    xformedItems = dataMat.T * U[:, :4] * Sig4.I
+    for j in range(n):
+        userRating = dataMat[user, j]
+        if userRating == 0 or j == item:
+            continue
+        similarity = simMeas(xformedItems[item, :].T, xformedItems[j, :].T)  # 两个物品相似度
+        simTotal += similarity
+        ratSimTotal += similarity * userRating
+    return 0 if simTotal == 0 else ratSimTotal / simTotal  # 相似度加权计算item得分
+
 if __name__ == "__main__":
-    dataMat = [[1, 1, 0, 2, 2],
-               [0, 0, 0, 3, 3],
-               [0, 0, 0, 1, 1],
-               [1, 1, 1, 0, 0],
+    dataMat = [[4, 4, 0, 2, 2],
+               [4, 0, 0, 3, 3],
+               [4, 0, 0, 1, 1],
+               [1, 1, 1, 2, 0],
                [2, 2, 2, 0, 0],
                [1, 1, 1, 0, 0],
                [5, 5, 5, 0, 0]]
     myMat = np.mat(dataMat)
-    # print(ecludSim(myMat[:, 0], myMat[:, 4]))
-    # print(cosSim(myMat[:, 0], myMat[:, 4]))
-    # print(pearsSim(myMat[:, 0], myMat[:, 4]))
 
-    myMat[0, 0] = myMat[0, 1] = myMat[1, 0] = myMat[2, 0] = 4
-    myMat[3, 3] = 2
     print(recommend(myMat, 2))
+    print(recommend(myMat, 2, simMeas=ecludSim))
+    print(recommend(myMat, 2, simMeas=pearsSim))
+
+    print(recommend(myMat, 2, estMethod=svdEst))
