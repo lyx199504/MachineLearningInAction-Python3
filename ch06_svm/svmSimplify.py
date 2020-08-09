@@ -41,7 +41,7 @@ def smoSimple(dataMatIn, classLabels, C, toler, maxIter):
     while iter < maxIter:
         alphaPairsChanged = 0
         for i in range(m):
-            # KTT条件公式为：f = (W^T)x + b = alpha*label*x*(x[i]^T) + b
+            # 超平面目标函数为：f = (W^T)x + b = alpha*label*x*(x[i]^T) + b
             fXi = float(np.multiply(alphas, labelMat).T * (dataMat*dataMat[i, :].T)) + b
             Ei = fXi - float(labelMat[i])  # 使f趋向于label，即使(W^T)x + b - label ≈ 0，E为误差
             if labelMat[i] * Ei < -toler and alphas[i] < C or labelMat[i] * Ei > toler and alphas[i] > 0:
@@ -54,26 +54,33 @@ def smoSimple(dataMatIn, classLabels, C, toler, maxIter):
                 Ej = fXj - float(labelMat[j])
                 alphaIold = alphas[i].copy()
                 alphaJold = alphas[j].copy()
+                # 对偶问题约束：alphas[1]*labelMat[1]+alphas[2]*labelMat[2]+...+alphas[m]*labelMat[m] = 0
+                # 约束可化为：alphas[i]*labelMat[i]+alphas[j]*labelMat[j] = K
                 if labelMat[i] != labelMat[j]:
+                    # alphas[i] - alphas[j] = k
+                    # alphas[j] = alphas[i] - k值域为[0-k, C-k] = [alphas[j] - alphas[i], C + alphas[j] - alphas[i]]
                     L = max(0, alphas[j] - alphas[i])
                     H = min(C, C + alphas[j] - alphas[i])
                 else:
+                    # alphas[i] + alphas[j] = k
+                    # alphas[j] = k - alphas[i]值域为[k-C, k] = [alphas[j] + alphas[i] - C, alphas[j] + alphas[i]]
                     L = max(0, alphas[j] + alphas[i] - C)
                     H = min(C, alphas[j] + alphas[i])
                 if L == H:
                     print("L==H")
                     continue
                 eta = 2.0 * dataMat[i, :] * dataMat[j, :].T - dataMat[i, :] * dataMat[i, :].T - dataMat[j, :] * dataMat[j, :].T
-                if eta >= 0:  # 公式：eta = 2XiXj - Xi^2 - Xj^2，我也不懂
+                if eta >= 0:  # 公式eta = 2XiXj - Xi^2 - Xj^2，是对偶问题目标函数求导后得到的
                     print("eta>=0")
                     continue
-                alphas[j] -= labelMat[j]*(Ei - Ej)/eta  # 调整alpha，公式我也不懂
-                alphas[j] = clipAlpha(alphas[j], H, L)  # 将alpha限制在闭区间[L, H]中
+                alphas[j] -= labelMat[j]*(Ei - Ej)/eta  # 调整alpha[j]
+                alphas[j] = clipAlpha(alphas[j], H, L)  # 将alpha[j]限制在闭区间[L, H]中
                 if abs(alphas[j] - alphaJold) < 0.00001:
                     print("j not moving enough")
                     continue
-                # 下面这一坨我也不知道是怎么来的，很乱，等我理解透彻再更新注释吧！！！
+                # alphas[i]*labelMat[i]+alphas[j]*labelMat[j] = alphasIold*labelMat[i]+alphasJold*labelMat[j]
                 alphas[i] += labelMat[j]*labelMat[i]*(alphaJold - alphas[j])
+                # 根据超平面函数f = alpha*label*x*(x[i]^T) + b和已更新的alphas[i] alphas[j]来更新b
                 b1 = b - Ei - labelMat[i]*(alphas[i]-alphaIold)*dataMat[i, :]*dataMat[i, :].T \
                      - labelMat[j]*(alphas[j]-alphaJold)*dataMat[i, :]*dataMat[j, :].T
                 b2 = b - Ej - labelMat[i]*(alphas[i]-alphaIold)*dataMat[i, :]*dataMat[j, :].T \
