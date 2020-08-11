@@ -14,7 +14,7 @@ def stumpClassify(dataMatrix, dimen, threshVal, threshIneq):
         retArray[dataMatrix[:, dimen] > threshVal] = -1.0
     return retArray
 
-# 根据单个特征分类，选取最好的分类结果
+# 基学习器：根据单个特征分类，选取最好的分类结果
 def buildStump(dataArr, classLabels, D):
     dataMat, labelMat = np.mat(dataArr), np.mat(classLabels).T
     m, n = np.shape(dataMat)
@@ -42,23 +42,28 @@ def buildStump(dataArr, classLabels, D):
 def adaBoostTrainDS(dataArr, classLabels, numIter=40):
     weakClassArr = []
     m = np.shape(dataArr)[0]
-    D = np.mat(np.ones((m, 1))/m)  # 初始化1/m的权重
-    aggClass = np.mat(np.zeros((m, 1)))
+    D = np.mat(np.ones((m, 1))/m)  # 训练集权重，初始化为1/m
+    print("D: ", D.T)
+    aggClass = np.mat(np.zeros((m, 1)))  # 集成分类结果
+    print("aggClass: ", aggClass.T)
     for i in range(numIter):
-        bestStump, minError, bestClass = buildStump(dataArr, classLabels, D)
-        print("D: ", D.T)
+        bestStump, minError, bestClass = buildStump(dataArr, classLabels, D)  # 基学习算法
+        print("minError: ", minError)
+        print("bestClass: ", bestClass.T)
         # 计算alpha公式：alpha = 1/2*ln((1-epsilon)/epsilon)
         alpha = float(0.5*np.log((1.0-minError)/max(minError, 1e-16)))
         bestStump['alpha'] = alpha
+        print("bestStump: ", bestStump)
         weakClassArr.append(bestStump)
-        print("bestClass: ", bestClass.T)
         # 调整权重D公式：
         #   样本分类正确：D(i+1) = D(i)*exp(-alpha)/sum(D(i))
         #   样本分类错误：D(i+1) = D(i)*exp(alpha)/sum(D(i))
         expon = np.multiply(-1*alpha*np.mat(classLabels).T, bestClass)
         D = np.multiply(D, np.exp(expon))
         D = D/D.sum()
-        aggClass += alpha*bestClass  # sign(aggClass)为分类结果
+        print("D: ", D.T)
+        # 公式aggClass = sigma(alpha*bestClass)
+        aggClass += alpha*bestClass  # sign(aggClass)为集成分类结果
         print("aggClass: ", aggClass.T)
         # 计算分类错误率
         aggErrors = np.multiply(np.sign(aggClass) != np.mat(classLabels).T, np.ones((m, 1)))
